@@ -1,6 +1,9 @@
+"use client";
 import { useState, useEffect } from "react";
 
 import { usePathname } from "next/navigation";
+import Button from "./Button";
+import { signOut } from "next-auth/react";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -183,6 +186,7 @@ export default function Navbar() {
             >
               Saved Meals
             </a>
+            <Button styles="" text="Log out" callback={signOut} />
           </div>
         </div>
       ) : null}

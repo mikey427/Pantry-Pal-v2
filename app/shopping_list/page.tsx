@@ -5,7 +5,7 @@ import PageHeader from "../../Components/PageHeader";
 
 type Props = {};
 
-export default function page({}: Props) {
+export default function ShoppingListPage({}: Props) {
   const desc =
     "This is where you will track all of the ingredients you will need to buy for your upcoming meals. The default is currently 1 week. (You will be able to adjust this in the future)";
   return (

@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { PlannedMonth, ListItem } from "../app/types";
-import { getMonthName } from "../app/utils";
+import { PlannedMonth, ListItem } from "../lib/types";
+import { getMonthName } from "../lib/utils";
 
 export default function Home() {
   const [plannedMonth, setPlannedMonth] = useState<PlannedMonth>({});
@@ -29,7 +29,7 @@ export default function Home() {
       }
       setPlannedMeals(temp);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex flex-col sm:flex-row h-full w-full container justify-center px-4 sm:px-0 mx-auto">
@@ -52,7 +52,11 @@ export default function Home() {
                   >{`${currentMonth} ${idx}: ${meal}`}</li>
                 );
               } else {
-                return <p className="w-max px-2">No upcoming meals!</p>;
+                return (
+                  <p key={idx} className="w-max px-2">
+                    No upcoming meals!
+                  </p>
+                );
               }
             })
           ) : (

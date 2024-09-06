@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { retrieveLocalData, updateLocalData } from "../utils";
-import { Meal } from "../types";
+import { retrieveLocalData, updateLocalData } from "../../lib/utils";
+import { Meal } from "../../lib/types";
 import PageHeader from "../../Components/PageHeader";
 import Button from "../../Components/Button";
 
@@ -13,7 +13,7 @@ import Button from "../../Components/Button";
 
 type Props = {};
 
-export default function page({}: Props) {
+export default function SavedMealsPage({}: Props) {
   const [meals, setMeals] = useState<Meal[]>([
     {
       id: "1",

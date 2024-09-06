@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model User {
+  id           Int            @id @default(autoincrement())
+  name         String
+  email        String         @unique
+  image        String?
+  role         Role           @default(USER)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  householdId  Int
+  household    Household      @relation(fields: [householdId], references: [id])
+  profile      Profile?
+  ShoppingList ShoppingList[]
+}
+
+model Profile {
+  id     Int     @id @default(autoincrement())
+  bio    String?
+  user   User    @relation(fields: [userId], references: [id])
+  userId Int     @unique
+}
+
+model Household {
+  id             Int          @id @default(autoincrement())
+  name           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  members        User[]
+  savedMealId    Int          @unique
+  ingredientId   Int          @unique
+  plannedMealId  Int          @unique
+  shoppingListId Int          @unique
+  savedMeals     SavedMeal    @relation(fields: [savedMealId], references: [id])
+  ingredients    Ingredient   @relation(fields: [ingredientId], references: [id])
+  plannedMeals   PlannedMeal  @relation(fields: [plannedMealId], references: [id])
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id])
+}
+
+model SavedMeal {
+  id          Int        @id @default(autoincrement())
+  name        String
+  data        Json
+  householdId Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  household   Household?
+}
+
+model Ingredient {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  householdId Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  household   Household?
+}
+
+model PlannedMeal {
+  id          Int        @id @default(autoincrement())
+  householdId Int        @unique
+  data        Json // This will store the entire meal plan as a Json object
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  household   Household?
+}
+
+model ShoppingList {
+  id          Int        @id @default(autoincrement())
+  itemName    String
+  quantity    Float
+  unit        String
+  purchased   Boolean    @default(false)
+  userId      Int
+  householdId Int        @unique
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id])
+  household   Household?
+}
+
+enum Role {
+  USER
+  ADMIN
+}

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { retrieveLocalData, updateLocalData } from "../app/utils";
-import { Category, Food } from "../app/types";
+import { retrieveLocalData, updateLocalData } from "../lib/utils";
+import { Category, Food } from "../lib/types";
 import { DndContext } from "@dnd-kit/core";
 import { useSensor, useSensors, PointerSensor } from "@dnd-kit/core";
 import Draggable from "./Draggable";

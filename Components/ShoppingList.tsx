@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { retrieveLocalData, updateLocalData } from "../app/utils";
-import { ListItem } from "../app/types";
+import { retrieveLocalData, updateLocalData } from "../lib/utils";
+import { ListItem } from "../lib/types";
 import Button from "./Button";
 import DecrementIcon from "./SVGs/DecrementIcon";
 import IncrementIcon from "./SVGs/IncrementIcon";

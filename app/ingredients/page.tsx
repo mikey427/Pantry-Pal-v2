@@ -9,7 +9,7 @@ interface IngredientsData {
   [key: string]: string[];
 }
 
-export default function page({}: Props) {
+export default function IngredientsPage({}: Props) {
   // const [ingredientCategories, setIngredientCategories] = useState<IngredientsData>({
   //     "proteins": [],
   //     "vegetables": [],

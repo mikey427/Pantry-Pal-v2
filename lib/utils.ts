@@ -1,4 +1,4 @@
-import SavedMeals from "./saved_meals/page";
+import SavedMeals from "../app/saved_meals/page";
 
 export {};
 

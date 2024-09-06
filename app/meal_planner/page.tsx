@@ -4,7 +4,7 @@ import Calendar from "../../Components/Calendar";
 
 type Props = {};
 
-export default function page({}: Props) {
+export default function MealPlannerPage({}: Props) {
   return (
     <div className="w-screen h-min p-6">
       <Calendar />

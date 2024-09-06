@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { PlannedMonth, Meal, Category, Food } from "../app/types";
+import { PlannedMonth, Meal, Category, Food } from "../lib/types";
 import {
   retrieveLocalData,
   updateLocalData,
   getMonthName,
   nthNumber,
-} from "../app/utils";
+} from "../lib/utils";
 import SavedMeals from "../app/saved_meals/page";
 
 type Props = {};
@@ -246,7 +246,7 @@ export default function Calendar({}: Props) {
       )?.ingredients;
       let temp: any = [...ingredients];
       mealIngredients?.forEach((ingredient, idx) => {
-        // grabs category of the ingredient, returns undefined if doesn't find it
+        // grabs category of the ingredient, returns undefined if doesn\'t find it
         const ingredientCategory = ingredients.find((category) =>
           category.foods.some((food) => food.name === ingredient)
         );
@@ -469,7 +469,6 @@ export default function Calendar({}: Props) {
                   className="h-5 w-5"
                   viewBox="0 0 20 20"
                   fill="currentColor"
-                  aria-hidden="true"
                 >
                   <path
                     fillRule="evenodd"
@@ -495,7 +494,6 @@ export default function Calendar({}: Props) {
                   className="h-5 w-5"
                   viewBox="0 0 20 20"
                   fill="currentColor"
-                  aria-hidden="true"
                 >
                   <path
                     fillRule="evenodd"
@@ -681,7 +679,6 @@ export default function Calendar({}: Props) {
                       className="h-5 w-5 text-red-400"
                       viewBox="0 0 20 20"
                       fill="currentColor"
-                      aria-hidden="true"
                     >
                       <path
                         fillRule="evenodd"
@@ -713,9 +710,7 @@ export default function Calendar({}: Props) {
               className={`relative z-30 ${
                 !showModal ? "hidden" : ""
               } flex items-center justify-center`}
-              aria-labelledby="modal-title"
               role="dialog"
-              aria-modal="true"
             >
               <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
               <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -750,8 +745,6 @@ export default function Calendar({}: Props) {
                             onFocus={() => setShowDropdown(true)}
                             className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                             role="combobox"
-                            aria-controls="options"
-                            aria-expanded="false"
                           />
                           <button
                             type="button"
@@ -762,7 +755,6 @@ export default function Calendar({}: Props) {
                               className="h-5 w-5 text-gray-400"
                               viewBox="0 0 20 20"
                               fill="currentColor"
-                              aria-hidden="true"
                             >
                               <path
                                 fillRule="evenodd"
@@ -812,7 +804,6 @@ export default function Calendar({}: Props) {
                                       className="h-5 w-5"
                                       viewBox="0 0 20 20"
                                       fill="currentColor"
-                                      aria-hidden="true"
                                     >
                                       <path
                                         fillRule="evenodd"
