@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PlannedMonth, ListItem } from "../lib/types";
 import { getMonthName } from "../lib/utils";
+import { useSession } from "next-auth/react";
 
 export default function Home() {
   const [plannedMonth, setPlannedMonth] = useState<PlannedMonth>({});
@@ -13,8 +14,10 @@ export default function Home() {
   );
   const [currentDay, setCurrentDay] = useState<number>(new Date().getDate());
   const [shoppingList, setShoppingList] = useState<ListItem[]>([]);
+  const session = useSession();
 
   useEffect(() => {
+    console.log(session);
     let savedMeals = localStorage.getItem(currentMonth);
     let list = localStorage.getItem("shoppingList");
     setShoppingList(list ? JSON.parse(list) : []);

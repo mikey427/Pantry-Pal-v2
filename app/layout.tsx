@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/Components/Navbar";
+import NavbarV2 from "@/Components/NavbarV2";
 import { getSession } from "next-auth/react";
 import SessionProvider from "@/Components/SessionProvider";
 
@@ -15,13 +16,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getSession();
+const session = await getSession();
+
   return (
     <html lang="en">
-      <body>
+      <body className="bg-primary">
         <SessionProvider session={session}>
-          <Navbar />
-          <main>{children}</main>
+          {/* <Navbar /> */}
+          <NavbarV2 />
+          <main className="bg-primary">{children}</main>
         </SessionProvider>
       </body>
     </html>

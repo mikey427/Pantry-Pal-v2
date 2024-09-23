@@ -11,14 +11,18 @@ export const options: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
+        email: {
+          label: "Email",
+          type: "text",
+          placeholder: "jsmith@example.com",
+        },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials): Promise<any> {
         //Where you would check the DB to see if user exists in a DB
         const user = { id: 1, name: "test", email: "testEmail@gmail.com" };
         if (
-          credentials?.username === "test" &&
+          credentials?.email === "test@test.com" &&
           credentials?.password === "test"
         ) {
           return user;

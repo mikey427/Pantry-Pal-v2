@@ -56,7 +56,7 @@ export default function Navbar() {
             </button>
           </div>
 
-          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start sm:justify-between">
+          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-between">
             <div className="flex flex-shrink-0 items-center text-white text-2xl">
               Pantry Pal
               {/* <img className="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=500" alt="Your Company" /> */}

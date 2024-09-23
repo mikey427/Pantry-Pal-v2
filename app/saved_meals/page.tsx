@@ -109,7 +109,7 @@ export default function SavedMealsPage({}: Props) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 text-gray-700">
+    <div className="container bg-primary w-screen h-screen mx-auto px-4 py-8 text-gray-700">
       <PageHeader
         title="Saved Meals"
         description="This is where you can view, edit, and delete your saved meals which can be scheduled as a meal on the Meal Planner."
@@ -250,10 +250,14 @@ export default function SavedMealsPage({}: Props) {
                           setIngredientInput(event.target.value)
                         }
                       />
-                      <button
-                        type="button"
-                        className="btn text-sm h-8 bg-accent text-white border-0"
-                        onClick={() => {
+                      <Button
+                        text={`${
+                          selectedIngredientIndex !== null
+                            ? "Edit Ingredient"
+                            : "Add Ingredient"
+                        }`}
+                        styles="btn text-sm h-8 bg-accent text-white border-0"
+                        callback={() => {
                           if (modalData) {
                             let temp: Meal = modalData;
                             // Editing existing ingredient
@@ -273,11 +277,7 @@ export default function SavedMealsPage({}: Props) {
                           setIngredientInput("");
                           setSelectedIngredientIndex(null); // Reset selected index
                         }}
-                      >
-                        {selectedIngredientIndex !== null
-                          ? "Edit Ingredient"
-                          : "Add Ingredient"}
-                      </button>
+                      />
                     </div>
                   </div>
 

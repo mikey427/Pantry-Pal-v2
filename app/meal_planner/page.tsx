@@ -6,7 +6,7 @@ type Props = {};
 
 export default function MealPlannerPage({}: Props) {
   return (
-    <div className="w-screen h-min p-6">
+    <div className="w-screen bg-primary h-min p-6">
       <Calendar />
     </div>
   );
