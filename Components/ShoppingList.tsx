@@ -1,24 +1,48 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { retrieveLocalData, updateLocalData } from "../lib/utils";
-import { ListItem } from "../lib/types";
+import { ListItem } from "../@types/types";
 import Button from "./Button";
 import DecrementIcon from "./SVGs/DecrementIcon";
 import IncrementIcon from "./SVGs/IncrementIcon";
+import { useSession } from "next-auth/react";
 
-type Props = {};
+type Props = {
+  shared: boolean;
+};
 
-export default function ShoppingList({}: Props) {
-  const [list, setList] = useState<ListItem[]>([]);
+export default function ShoppingList({ shared }: Props) {
+  const session = useSession();
+  // const [list, setList] = useState<ListItem[]>([]);
+  const [sharedList, setSharedList] = useState<ListItem[]>([]);
+  const [privateList, setPrivateList] = useState<ListItem[]>([]);
   const [input, setInput] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    window.location.origin ||
+    "localhost:3000";
 
   useEffect(() => {
-    const savedList = retrieveLocalData("shoppingList");
-    if (savedList) {
-      setList(savedList);
+    if (shared == true) {
+      if (session.data?.user?.householdId) {
+        const retrieveShoppingList = async () => {
+          const response = await fetch(
+            `${baseUrl}/api/ingredients?householdId=${session.data?.user?.householdId}`
+          );
+          const data = await response.json();
+          console.log(data);
+          setSharedList(data);
+        };
+        retrieveShoppingList();
+      }
+    } else {
+      const savedList = retrieveLocalData("shoppingList");
+      if (savedList) {
+        setPrivateList(savedList);
+      }
     }
-  }, []);
+  }, [session]);
 
   const addListing = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -27,38 +51,53 @@ export default function ShoppingList({}: Props) {
         name: input.trim(),
         quantity: quantity,
       };
-      setList((prevList) => [...prevList, newItem]);
-      setInput("");
-      setQuantity(1);
-      updateLocalData("shoppingList", [...list, newItem]);
+      if (shared) {
+      } else {
+        setPrivateList((prevList) => [...prevList, newItem]);
+        setInput("");
+        setQuantity(1);
+        updateLocalData("shoppingList", [...privateList, newItem]);
+      }
     }
   };
 
   const removeItem = (index: number): void => {
-    const newList = [...list];
+    const newList = [...privateList];
     newList.splice(index, 1);
-    setList(newList);
-    updateLocalData("shoppingList", newList);
+    setPrivateList(newList);
+    if (shared) {
+    } else {
+      updateLocalData("shoppingList", newList);
+    }
   };
 
   const clearList = (): void => {
-    setList([]);
-    updateLocalData("shoppingList", []);
+    setPrivateList([]);
+    if (shared) {
+    } else {
+      updateLocalData("shoppingList", []);
+    }
   };
 
   const handleIncrementQuantity = (index: number): void => {
-    const newList = [...list];
+    const newList = [...privateList];
     newList[index].quantity++;
-    setList(newList);
-    updateLocalData("shoppingList", newList);
+    setPrivateList(newList);
+    if (shared) {
+    } else {
+      updateLocalData("shoppingList", newList);
+    }
   };
 
   const handleDecrementQuantity = (index: number): void => {
-    const newList = [...list];
+    const newList = [...privateList];
     if (newList[index].quantity > 1) {
       newList[index].quantity--;
-      setList(newList);
-      updateLocalData("shoppingList", newList);
+      setPrivateList(newList);
+      if (shared) {
+      } else {
+        updateLocalData("shoppingList", newList);
+      }
     }
   };
 
@@ -94,30 +133,67 @@ export default function ShoppingList({}: Props) {
           styles="bg-red-500 hover:bg-red-800 text-white"
         />
         <ul className="mt-6">
-          {list.map((item, idx) => (
-            <li key={idx} className="flex justify-between items-center py-2">
-              <span className="flex">
-                <DecrementIcon
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleDecrementQuantity(idx);
-                  }}
-                />
-                <IncrementIcon
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleIncrementQuantity(idx);
-                  }}
-                />
-                <span className=" ml-4 w-28">
-                  {item.name}: {item.quantity}
-                </span>
-              </span>
-              <button onClick={() => removeItem(idx)} className="text-red-500">
-                Remove
-              </button>
-            </li>
-          ))}
+          {shared
+            ? sharedList.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="flex justify-between items-center py-2"
+                >
+                  <span className="flex">
+                    <DecrementIcon
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDecrementQuantity(idx);
+                      }}
+                    />
+                    <IncrementIcon
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleIncrementQuantity(idx);
+                      }}
+                    />
+                    <span className=" ml-4 w-28">
+                      {item.name}: {item.quantity}
+                    </span>
+                  </span>
+                  <button
+                    onClick={() => removeItem(idx)}
+                    className="text-red-500"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))
+            : privateList.map((item, idx) => (
+                <li
+                  key={idx}
+                  className="flex justify-between items-center py-2"
+                >
+                  <span className="flex">
+                    <DecrementIcon
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDecrementQuantity(idx);
+                      }}
+                    />
+                    <IncrementIcon
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleIncrementQuantity(idx);
+                      }}
+                    />
+                    <span className=" ml-4 w-28">
+                      {item.name}: {item.quantity}
+                    </span>
+                  </span>
+                  <button
+                    onClick={() => removeItem(idx)}
+                    className="text-red-500"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
         </ul>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { PlannedMonth, Meal, Category, Food } from "../lib/types";
+import { PlannedMonth, Meal, Category, Food } from "../@types/types";
 import {
   retrieveLocalData,
   updateLocalData,
@@ -8,10 +8,13 @@ import {
   nthNumber,
 } from "../lib/utils";
 import SavedMeals from "../app/saved_meals/page";
+import { useSession } from "next-auth/react";
+import { POST } from "@/app/api/auth/[...nextauth]/route";
 
-type Props = {};
+type Props = { data: any };
 
-export default function Calendar({}: Props) {
+export default function Calendar({ data }: Props) {
+  const session = useSession();
   const [currentMonthIndex, setCurrentMonthIndex] = useState(
     new Date().getMonth()
   );
@@ -58,7 +61,11 @@ export default function Calendar({}: Props) {
   const [showModal, setShowModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showError, setShowError] = useState(false);
+  // const [data, setData] = useState(null);
+  // const [isLoading, setLoading] = useState(true);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
   const modalRef = useRef<HTMLDivElement>(null);
+  // console.log("data", data);
   let timer: any;
 
   const closeModal = (event: any) => {
@@ -92,7 +99,9 @@ export default function Calendar({}: Props) {
   };
 
   // Function to handle form submission
-  const handleSubmit = (event: any, day: string): void => {
+  const handleSubmit = async (event: any, day: string) => {
+    updateCalendarData(input);
+    console.log(day);
     // Check if the meal is already saved
     const mealExists = savedMeals.find((meal) => meal.name === input);
     if (!mealExists) {
@@ -109,6 +118,27 @@ export default function Calendar({}: Props) {
     setSelectedDay(null);
     setShowModal(false);
 
+    // Mock request body to send to API when appending a meal to the overall data object
+    // {
+    //   "date": "2024-11-04",  // ISO date string
+    //   "mealData": {
+    //     "name": "Chicken Salad",
+    //     "calories": 500,
+    //   }
+    // }
+    // const req = fetch(
+    //   `${baseUrl}/api/planned-meals?houseHoldId=${session.data?.user?.id}`,
+    //   {
+    //     method: "POST",
+    //     body: JSON.stringify({
+    //       date: meal,
+    //     }),
+    //   }
+    // )
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     console.log(data);
+    //   });
     // Update local storage with the modified planned meals data
     updateLocalData(getMonthName(currentMonthIndex), plannedMeals);
   };
@@ -172,25 +202,6 @@ export default function Calendar({}: Props) {
   const handleNextMonth = () => {
     setCurrentMonthIndex((prevIndex) => (prevIndex === 11 ? 0 : prevIndex + 1));
   };
-
-  const ingredients12 = [
-    {
-      id: 1,
-      name: "Category 1",
-      foods: [
-        {
-          name: "Food 1",
-          quantity: 1,
-          catefor: "Category 1",
-        },
-        {
-          name: "Food 2",
-          quantity: 2,
-          category: "Category 1",
-        },
-      ],
-    },
-  ];
 
   const handleCheck = (event: any, day: string, meal: string) => {
     event.stopPropagation();
@@ -315,15 +326,83 @@ export default function Calendar({}: Props) {
   const currentMonth = new Date().getMonth();
   const daysInMonth = getDaysForMonth(currentYear, currentMonthIndex);
 
+  const fetchCalendarData = async () => {
+    try {
+      if (!session?.data?.user?.householdId) {
+        console.log("No household ID available");
+        return;
+      }
+      // console.log("currentMonth", currentMonth);
+      // console.log("currentMonthIndex", currentMonthIndex);
+      console.log(getMonthName(currentMonthIndex));
+      console.log("currentYear", currentYear);
+
+      const response = await fetch(
+        `${baseUrl}/api/planned-meals?householdId=${session.data.user.householdId}&month=${currentMonthIndex}_${currentYear}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const { data } = await response.json();
+      console.log("response data:", data);
+
+      if (data) {
+        setPlannedMeals(data as PlannedMonth);
+      }
+    } catch (error) {
+      console.error("Error fetching calendar data:", error);
+    }
+  };
+
+  const updateCalendarData = async (day: number, savedMealName: string) => {
+    try {
+      if (!session?.data?.user?.householdId) {
+        console.log("No household ID available");
+        return;
+      }
+
+      const response = await fetch(
+        `${baseUrl}/api/planned-meals?householdId=${session.data.user.householdId}&month=${currentMonthIndex}_${currentYear}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            day: selectedDay,
+            savedMealName: savedMealName,
+          }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const res = await response.json();
+      console.log(res);
+    } catch (error) {
+      console.error("Error updating calendar data:", error);
+    }
+  };
+
   // Effect hook to retrieve local data when currentMonthIndex changes
   useEffect(() => {
     setPlannedMeals(
       retrieveLocalData("calendarData", getMonthName(currentMonthIndex))
     );
+
     setSavedMeals(retrieveLocalData("savedMeals"));
     setIngredients(retrieveLocalData("ingredients"));
     setTimeout(() => setLoading(false), 500);
-  }, [currentMonthIndex]);
+
+    if (session.data?.user?.id) {
+      fetchCalendarData();
+      // updateCalendarData({ exampleData: "" }, "example");
+    }
+    // fetchCalendarData();
+    // if (data) {
+    //   setPlannedMeals({});
+    // }
+  }, [currentMonthIndex, session]);
 
   type Event = {
     id: number;

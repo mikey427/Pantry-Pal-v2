@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { retrieveLocalData, updateLocalData } from "../../lib/utils";
-import { Meal } from "../../lib/types";
+import { Meal } from "../../@types/types";
 import PageHeader from "../../Components/PageHeader";
 import Button from "../../Components/Button";
+import { useSession } from "next-auth/react";
 
 // interface Meal {
 //     id: string;
@@ -14,13 +15,8 @@ import Button from "../../Components/Button";
 type Props = {};
 
 export default function SavedMealsPage({}: Props) {
-  const [meals, setMeals] = useState<Meal[]>([
-    {
-      id: "1",
-      name: "Meal 1",
-      ingredients: ["Chicken", "Ketchup"],
-    },
-  ]);
+  const session = useSession();
+  const [meals, setMeals] = useState<Meal[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [modalData, setModalData] = useState<Meal | null>(null);
@@ -32,11 +28,56 @@ export default function SavedMealsPage({}: Props) {
   >(null);
   const [editing, setEditing] = useState(false);
   const [viewMode, setViewMode] = useState("list"); // list or grid
+  const [status, setStatus] = useState<string | null>(session.status);
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    window.location.origin ||
+    "localhost:3000";
 
+  // useEffect(() => {
+  //   const savedMeals = retrieveLocalData("savedMeals") || [];
+  //   setMeals(savedMeals);
+  // }, []);
+
+  // useEffect(() => {
+  //   console.log("session", session);
+  //   const retrieveData = async () => {
+  //     if (status != "authenticated") return;
+  //     // console.log("reached api call");
+  //     const response = await fetch(
+  //       `${baseUrl}/api/saved-meals?householdId=${session?.data?.user?.householdId}`
+  //     );
+  //     const data = await response.json();
+  //     setMeals(data);
+  //   };
+  //   retrieveData();
+  // }, [status]);
   useEffect(() => {
-    const savedMeals = retrieveLocalData("savedMeals") || [];
-    setMeals(savedMeals);
-  }, []);
+    const retrieveData = async () => {
+      if (
+        session.status === "authenticated" &&
+        session.data?.user?.householdId
+      ) {
+        try {
+          const response = await fetch(
+            `${baseUrl}/api/saved-meals?householdId=${session.data.user.householdId}`
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch saved meals");
+          }
+
+          const data = await response.json();
+          console.log("data", data);
+          setMeals(data);
+        } catch (error) {
+          console.error("Error fetching saved meals:", error);
+        }
+      }
+    };
+
+    retrieveData();
+  }, [session.status, session.data]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -53,6 +94,7 @@ export default function SavedMealsPage({}: Props) {
     if (meal) {
       setEditing(true);
     }
+    console.log("meal in openModal", meal);
     setModalData(meal);
   };
 
@@ -65,44 +107,102 @@ export default function SavedMealsPage({}: Props) {
     setEditing(false);
   };
 
-  const addMeal = (newMeal: Meal) => {
+  // const addMeal = (newMeal: Meal) => {
+  //   setMeals((prevMeals) => [...prevMeals, newMeal]);
+  //   console.log(newMeal);
+  //   updateLocalData("savedMeals", [...meals, newMeal]);
+  //   setIngredientInput("");
+  //   setMealNameInput("");
+  //   closeModal();
+  // };
+
+  const addMeal = async (newMeal: Meal) => {
+    event?.preventDefault();
     setMeals((prevMeals) => [...prevMeals, newMeal]);
-    updateLocalData("savedMeals", [...meals, newMeal]);
+    console.log(newMeal);
+    console.log("in addMeal");
+    const response = await fetch(
+      `${baseUrl}/api/saved-meals?householdId=${session?.data?.user?.householdId}&mealName=${newMeal.name}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ingredients: newMeal.ingredients }),
+      }
+    );
+    // console.log(response);
+    // updateLocalData("savedMeals", [...meals, newMeal]);
+    const data = await response.json();
+    console.log(data);
+    setMeals([...meals, newMeal]);
     setIngredientInput("");
     setMealNameInput("");
     closeModal();
   };
 
-  const editMeal = (editedMeal: Meal) => {
+  const editMeal = async (editedMeal: Meal) => {
+    // const updatedMeals = meals.map((meal) =>
+    //   meal.id === editedMeal.id ? editedMeal : meal
+    // );
+    // setMeals(updatedMeals);
+    // updateLocalData("savedMeals", updatedMeals);
+    console.log(editedMeal);
+    const response = await fetch(`${baseUrl}/api/saved-meals`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(editedMeal),
+    });
+    // console.log(response);
+    // May need to update this later, this may not be best practice way of updating initial meals
     const updatedMeals = meals.map((meal) =>
       meal.id === editedMeal.id ? editedMeal : meal
     );
     setMeals(updatedMeals);
-    updateLocalData("savedMeals", updatedMeals);
     closeModal();
   };
 
-  const deleteMeal = (id: string) => {
+  const deleteMeal = async (id: string) => {
+    const response = await fetch(`${baseUrl}/api/saved-meals`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: id,
+      }),
+    });
     const updatedMeals = meals.filter((meal) => meal.id !== id);
     setMeals(updatedMeals);
     updateLocalData("savedMeals", updatedMeals);
   };
+
   const toggleViewMode = () => {
     setViewMode(viewMode === "list" ? "grid" : "list");
   };
-  const addOrEditMeal = (event: React.FormEvent) => {
+
+  // TODO: Correct this function
+  const addOrEditMeal = async (event: React.FormEvent) => {
     event.preventDefault();
-    modalData
-      ? editMeal({
+    console.log("ingredients", ingredients);
+    modalData?.ingredients
+      ? await editMeal({
           id: modalData.id,
           name: mealNameInput,
           ingredients: ingredients,
         })
-      : addMeal({
+      : await addMeal({
           id: String(meals.length + 1),
           name: mealNameInput,
           ingredients: ingredients,
         });
+    // await addMeal({
+    //   id: String(meals.length + 1),
+    //   name: mealNameInput,
+    //   ingredients: ingredients,
+    // });
     setIngredients([]);
     setIngredientInput("");
     setMealNameInput("");
@@ -258,7 +358,8 @@ export default function SavedMealsPage({}: Props) {
                         }`}
                         styles="btn text-sm h-8 bg-accent text-white border-0"
                         callback={() => {
-                          if (modalData) {
+                          if (modalData?.ingredients) {
+                            console.log("modalData", modalData);
                             let temp: Meal = modalData;
                             // Editing existing ingredient
 
@@ -267,6 +368,8 @@ export default function SavedMealsPage({}: Props) {
                                 ingredientInput;
                               setModalData({ ...temp });
                             } else {
+                              console.log("Adding new ingredient");
+                              console.log("temp", temp);
                               temp.ingredients.push(ingredientInput);
                               setModalData({ ...temp });
                             }
@@ -283,7 +386,9 @@ export default function SavedMealsPage({}: Props) {
 
                   <div className="flex justify-end">
                     <Button
-                      callback={addOrEditMeal}
+                      callback={async (event) => {
+                        await addOrEditMeal(event);
+                      }}
                       isSubmit={true}
                       styles="mr-2 bg-green-500 text-white border-0"
                       text={modalData ? "Save Meal" : "Add Meal"}

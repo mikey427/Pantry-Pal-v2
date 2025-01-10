@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import Button from "./Button";
 import { signOut } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function NavbarV2() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,8 +15,9 @@ export default function NavbarV2() {
   const [isNotificationsMenuOpen, setIsNotificationsMenuOpen] = useState(false);
   const pathname = usePathname();
   const [currentTab, setCurrentTab] = useState<string>(pathname.split("/")[1]);
-  console.log(currentTab);
+  // console.log(currentTab);
   const session = useSession();
+  console.log(session);
 
   return (
     <nav className="bg-gray-800">
@@ -183,7 +185,7 @@ export default function NavbarV2() {
                   <span className="sr-only">Open user menu</span>
                   <img
                     className="h-8 w-8 rounded-full"
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    src={session.data?.user?.profilePic}
                     alt=""
                   />
                 </button>
@@ -208,8 +210,9 @@ export default function NavbarV2() {
                   tabIndex={-1}
                 >
                   {/* Active: "bg-gray-100", Not Active: "" */}
-                  <a
-                    href="#"
+                  <Link
+                    href={`/profile/${session.data?.user?.id}`}
+                    // href="#"
                     className={`block px-4 py-2 text-sm text-gray-700 ${
                       currentTab === "/profile" ? "bg-gray-100" : ""
                     }`}
@@ -218,7 +221,7 @@ export default function NavbarV2() {
                     id="user-menu-item-0"
                   >
                     Your Profile
-                  </a>
+                  </Link>
                   <a
                     href="/api/auth/signout"
                     className={`block px-4 py-2 text-sm text-gray-700`}

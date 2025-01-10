@@ -1,3 +1,6 @@
+import NextAuth, { DefaultSession } from "next-auth";
+import { AdapterUser } from "next-auth/adapters";
+import { JWT } from "next-auth/jwt";
 // export interface PlannedMonth {
 //     [key: string]: string,
 // }
@@ -8,9 +11,10 @@ export interface PlannedMonth {
 }
 
 export interface Category {
+  ingredients: any;
   id: number;
   name: string;
-  foods: Food[];
+  ingredient: Ingredient[];
   isOpen?: boolean;
 }
 
@@ -18,7 +22,7 @@ export interface Category {
 // 	name: string;
 // 	quantity: number;
 // }
-export interface Food {
+export interface Ingredient {
   id: number;
   name: string;
   quantity: number;

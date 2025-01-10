@@ -1,51 +1,57 @@
 import SavedMeals from "../app/saved_meals/page";
 
-export {};
-
 // Data Types
-const calendarData = {
+export const calendarData = {
   // Initialize planned meals for the month with empty strings
-  1: { name: "", checked: false },
-  2: { name: "", checked: false },
-  3: { name: "", checked: false },
-  4: { name: "", checked: false },
-  5: { name: "", checked: false },
-  6: { name: "", checked: false },
-  7: { name: "", checked: false },
-  8: { name: "", checked: false },
-  9: { name: "", checked: false },
-  10: { name: "", checked: false },
-  11: { name: "", checked: false },
-  12: { name: "", checked: false },
-  13: { name: "", checked: false },
-  14: { name: "", checked: false },
-  15: { name: "", checked: false },
-  16: { name: "", checked: false },
-  17: { name: "", checked: false },
-  18: { name: "", checked: false },
-  19: { name: "", checked: false },
-  20: { name: "", checked: false },
-  21: { name: "", checked: false },
-  22: { name: "", checked: false },
-  23: { name: "", checked: false },
-  24: { name: "", checked: false },
-  25: { name: "", checked: false },
-  26: { name: "", checked: false },
-  27: { name: "", checked: false },
-  28: { name: "", checked: false },
-  29: { name: "", checked: false },
-  30: { name: "", checked: false },
-  31: { name: "", checked: false },
+  1: {
+    mealId: null,
+    name: "",
+    checked: false,
+  },
+  2: {
+    mealId: null,
+    name: "",
+    checked: false,
+  },
+  3: { mealId: null, name: "", checked: false },
+  4: { mealId: null, name: "", checked: false },
+  5: { mealId: null, name: "", checked: false },
+  6: { mealId: null, name: "", checked: false },
+  7: { mealId: null, name: "", checked: false },
+  8: { mealId: null, name: "", checked: false },
+  9: { mealId: null, name: "", checked: false },
+  10: { mealId: null, name: "", checked: false },
+  11: { mealId: null, name: "", checked: false },
+  12: { mealId: null, name: "", checked: false },
+  13: { mealId: null, name: "", checked: false },
+  14: { mealId: null, name: "", checked: false },
+  15: { mealId: null, name: "", checked: false },
+  16: { mealId: null, name: "", checked: false },
+  17: { mealId: null, name: "", checked: false },
+  18: { mealId: null, name: "", checked: false },
+  19: { mealId: null, name: "", checked: false },
+  20: { mealId: null, name: "", checked: false },
+  21: { mealId: null, name: "", checked: false },
+  22: { mealId: null, name: "", checked: false },
+  23: { mealId: null, name: "", checked: false },
+  24: { mealId: null, name: "", checked: false },
+  25: { mealId: null, name: "", checked: false },
+  26: { mealId: null, name: "", checked: false },
+  27: { mealId: null, name: "", checked: false },
+  28: { mealId: null, name: "", checked: false },
+  29: { mealId: null, name: "", checked: false },
+  30: { mealId: null, name: "", checked: false },
+  31: { mealId: null, name: "", checked: false },
 };
 
-const shoppingList = [
+export const shoppingList = [
   {
     name: "Chicken",
     quantity: 2,
   },
 ];
 
-const ingredients = [
+export const ingredients = [
   {
     id: 0,
     name: "Category 1",
@@ -84,7 +90,7 @@ const ingredients = [
   },
 ];
 
-const savedMeals = [
+export const savedMeals = [
   {
     id: "1",
     name: "Meal 1",
@@ -179,6 +185,11 @@ export const retrieveLocalData = (dataName: string, modifier?: string): any => {
 export const updateLocalData = (dataName: string, data: any): void => {
   localStorage.setItem(dataName, JSON.stringify(data));
 };
+
+// export const baseUrl =
+//   process.env.NEXT_PUBLIC_BASE_URL ||
+//   window.location.origin ||
+//   "localhost:3000";
 
 //     "proteins": [],
 //     "vegetables": [],

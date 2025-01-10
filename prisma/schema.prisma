@@ -9,17 +9,17 @@ datasource db {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   name         String
-  email        String         @unique
+  email        String        @unique
   image        String?
-  role         Role           @default(USER)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  householdId  Int
-  household    Household      @relation(fields: [householdId], references: [id])
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  householdId  Int?
+  household    Household?    @relation(fields: [householdId], references: [id])
   profile      Profile?
-  ShoppingList ShoppingList[]
+  ShoppingList ShoppingList?
 }
 
 model Profile {
@@ -30,26 +30,26 @@ model Profile {
 }
 
 model Household {
-  id             Int          @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   name           String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   members        User[]
-  savedMealId    Int          @unique
-  ingredientId   Int          @unique
-  plannedMealId  Int          @unique
-  shoppingListId Int          @unique
-  savedMeals     SavedMeal    @relation(fields: [savedMealId], references: [id])
-  ingredients    Ingredient   @relation(fields: [ingredientId], references: [id])
-  plannedMeals   PlannedMeal  @relation(fields: [plannedMealId], references: [id])
-  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id])
+  savedMealId    Int?          @unique
+  ingredients    Ingredient[]
+  categories     Category[]
+  plannedMealId  Int?          @unique
+  shoppingListId Int?          @unique
+  savedMeals     SavedMeal?    @relation(fields: [savedMealId], references: [id])
+  plannedMeals   PlannedMeal?  @relation(fields: [plannedMealId], references: [id])
+  shoppingList   ShoppingList? @relation(fields: [shoppingListId], references: [id])
 }
 
 model SavedMeal {
   id          Int        @id @default(autoincrement())
   name        String
-  data        Json
-  householdId Int
+  ingredients String[]
+  householdId Int?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   household   Household?
@@ -59,33 +59,43 @@ model Ingredient {
   id          Int        @id @default(autoincrement())
   name        String
   description String?
-  householdId Int
+  categoryId  Int?
+  householdId Int?
+  quantity    Int?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  household   Household?
+  household   Household? @relation(fields: [householdId], references: [id])
+  Category    Category?  @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id          Int          @id @default(autoincrement())
+  name        String
+  householdId Int?
+  ingredients Ingredient[]
+  household   Household?   @relation(fields: [householdId], references: [id])
+  createdAt   DateTime     @default(now())
 }
 
 model PlannedMeal {
   id          Int        @id @default(autoincrement())
-  householdId Int        @unique
-  data        Json // This will store the entire meal plan as a Json object
+  householdId Int
+  month       String
   createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  household   Household?
+  year        Int
+  data        Json
+  Household   Household?
 }
 
 model ShoppingList {
   id          Int        @id @default(autoincrement())
-  itemName    String
-  quantity    Float
-  unit        String
-  purchased   Boolean    @default(false)
-  userId      Int
-  householdId Int        @unique
+  data        Json
+  userId      Int?       @unique
+  householdId Int?       @unique
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  user        User       @relation(fields: [userId], references: [id])
   household   Household?
+  user        User?      @relation(fields: [userId], references: [id])
 }
 
 enum Role {
