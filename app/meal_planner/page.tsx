@@ -26,7 +26,7 @@ export default function MealPlannerPage({}: Props) {
 
   return (
     <div className="w-screen bg-primary h-min p-6">
-      <Calendar />
+      <Calendar data={{}} />
     </div>
   );
 }
