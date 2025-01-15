@@ -5,6 +5,7 @@ import Navbar from "@/Components/Navbar";
 import NavbarV2 from "@/Components/NavbarV2";
 import { getSession } from "next-auth/react";
 import SessionProvider from "@/Components/SessionProvider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
@@ -16,7 +17,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-const session = await getSession();
+  const session = await getSession();
 
   return (
     <html lang="en">
@@ -25,6 +26,7 @@ const session = await getSession();
           {/* <Navbar /> */}
           <NavbarV2 />
           <main className="bg-primary">{children}</main>
+          <SpeedInsights />
         </SessionProvider>
       </body>
     </html>

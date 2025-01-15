@@ -9,17 +9,18 @@ datasource db {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  name         String
-  email        String        @unique
-  image        String?
-  role         Role          @default(USER)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  householdId  Int?
-  household    Household?    @relation(fields: [householdId], references: [id])
-  profile      Profile?
-  ShoppingList ShoppingList?
+  id             Int           @id @default(autoincrement())
+  name           String
+  email          String        @unique
+  image          String?
+  role           Role          @default(USER)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  householdId    Int?
+  household      Household?    @relation(fields: [householdId], references: [id])
+  profile        Profile?
+  ShoppingList   ShoppingList? @relation(fields: [shoppingListId], references: [id])
+  shoppingListId Int?
 }
 
 model Profile {
@@ -89,13 +90,13 @@ model PlannedMeal {
 
 model ShoppingList {
   id          Int        @id @default(autoincrement())
-  data        Json
-  userId      Int?       @unique
-  householdId Int?       @unique
+  name        String
+  quantity    Int
+  householdId Int?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   household   Household?
-  user        User?      @relation(fields: [userId], references: [id])
+  User        User[]
 }
 
 enum Role {

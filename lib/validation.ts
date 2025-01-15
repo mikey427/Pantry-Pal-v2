@@ -1,4 +1,4 @@
-export const validateHouseholdId = (householdId: string): boolean => {
+export const validateHouseholdId = (householdId: number): boolean => {
   if (!householdId) {
     return false;
   } else if (isNaN(Number(householdId))) {

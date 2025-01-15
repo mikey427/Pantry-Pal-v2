@@ -14,8 +14,9 @@ type Props = {
 export default function ShoppingList({ shared }: Props) {
   const session = useSession();
   // const [list, setList] = useState<ListItem[]>([]);
-  const [sharedList, setSharedList] = useState<ListItem[]>([]);
-  const [privateList, setPrivateList] = useState<ListItem[]>([]);
+  // const [sharedList, setSharedList] = useState<ListItem[]>([]);
+  // const [privateList, setPrivateList] = useState<ListItem[]>([]);
+  const [list, setList] = useState<ListItem[]>([]);
   const [input, setInput] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
   const baseUrl =
@@ -26,63 +27,159 @@ export default function ShoppingList({ shared }: Props) {
   useEffect(() => {
     if (shared == true) {
       if (session.data?.user?.householdId) {
+        console.log("session: ", session);
         const retrieveShoppingList = async () => {
           const response = await fetch(
-            `${baseUrl}/api/ingredients?householdId=${session.data?.user?.householdId}`
+            `${baseUrl}/api/shopping-list?householdId=${session.data?.user?.householdId}`
           );
+          // if (response.status === 404) {
+          //   const response = await fetch(
+          //     `${baseUrl}/api/shopping-list?houseHoldId=${session.data?.user?.householdId}`,
+          //     {
+          //       method: "PUT",
+          //       body: JSON.stringify({
+          //         householdId: session.data?.user?.householdId,
+          //       }),
+          //       headers: {
+          //         "Content-Type": "application/json",
+          //       },
+          //     }
+          //   );
+          // }
           const data = await response.json();
-          console.log(data);
-          setSharedList(data);
+          if (response.ok) {
+            setList(data);
+          } else {
+            setList([]);
+          }
+          console.log("data: ", data);
+          // setList(data);
         };
         retrieveShoppingList();
       }
     } else {
       const savedList = retrieveLocalData("shoppingList");
       if (savedList) {
-        setPrivateList(savedList);
+        setList(savedList);
       }
     }
   }, [session]);
 
-  const addListing = (event: React.FormEvent<HTMLFormElement>): void => {
+  // const addListing = async (
+  //   event: React.FormEvent<HTMLFormElement>,
+  //   listToUse?: string
+  // ) => {
+  //   event.preventDefault();
+  //   if (input.trim() !== "") {
+  //     const newItem: ListItem = {
+  //       name: input.trim(),
+  //       quantity: quantity,
+  //     };
+  //     const tempShoppingList = [...list, newItem];
+
+  //     if (shared) {
+  //       const response = await fetch(`${baseUrl}/api/shopping-list`, {
+  //         method: "PUT",
+  //         body: JSON.stringify({
+  //           householdId: session.data?.user?.householdId,
+  //           data: tempShoppingList,
+  //         }),
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //       });
+  //       const data = await response.json();
+  //       if (response.ok) {
+  //         console.log(data);
+  //         setList(data);
+  //       }
+  //     } else {
+  //       setList((prevList) => [...prevList, newItem]);
+  //       setInput("");
+  //       setQuantity(1);
+  //       updateLocalData("shoppingList", [...list, newItem]);
+  //     }
+  //   }
+  // };
+  const addListing = async (
+    event: React.FormEvent<HTMLFormElement>,
+    listToUse?: string
+  ) => {
     event.preventDefault();
     if (input.trim() !== "") {
       const newItem: ListItem = {
         name: input.trim(),
         quantity: quantity,
       };
+      const tempShoppingList = [...list, newItem];
+
       if (shared) {
+        const response = await fetch(`${baseUrl}/api/shopping-list`, {
+          method: "POST",
+          body: JSON.stringify({
+            householdId: session.data?.user?.householdId,
+            newItem,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          console.log(data);
+          setList(data);
+        } // Need to convert this to match the single record > shoppinglist item per household schema update
       } else {
-        setPrivateList((prevList) => [...prevList, newItem]);
+        setList((prevList) => [...prevList, newItem]);
         setInput("");
         setQuantity(1);
-        updateLocalData("shoppingList", [...privateList, newItem]);
+        updateLocalData("shoppingList", [...list, newItem]);
       }
     }
   };
 
-  const removeItem = (index: number): void => {
-    const newList = [...privateList];
-    newList.splice(index, 1);
-    setPrivateList(newList);
+  const removeItem = async (index: number) => {
     if (shared) {
+      const shoppingListItemId = list[index]?.id;
+      console.log(list[index]);
+      const response = await fetch(
+        `${baseUrl}/api/shopping-list?id=${shoppingListItemId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      console.log(response);
+      if (response.ok) {
+        const newList = [...list];
+        newList.splice(index, 1);
+        setList(newList);
+      }
     } else {
+      const newList = [...list];
+      newList.splice(index, 1);
+      setList(newList);
       updateLocalData("shoppingList", newList);
     }
   };
 
-  const clearList = (): void => {
-    setPrivateList([]);
+  const clearList = async () => {
     if (shared) {
+      const response = await fetch(`${baseUrl}/api/shopping-list?clear=TRUE`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setList([]);
+      }
     } else {
+      setList([]);
       updateLocalData("shoppingList", []);
     }
   };
 
   const handleIncrementQuantity = (index: number): void => {
-    const newList = [...privateList];
+    const newList = [...list];
     newList[index].quantity++;
-    setPrivateList(newList);
+    setList(newList);
     if (shared) {
     } else {
       updateLocalData("shoppingList", newList);
@@ -90,10 +187,10 @@ export default function ShoppingList({ shared }: Props) {
   };
 
   const handleDecrementQuantity = (index: number): void => {
-    const newList = [...privateList];
+    const newList = [...list];
     if (newList[index].quantity > 1) {
       newList[index].quantity--;
-      setPrivateList(newList);
+      setList(newList);
       if (shared) {
       } else {
         updateLocalData("shoppingList", newList);
@@ -133,67 +230,30 @@ export default function ShoppingList({ shared }: Props) {
           styles="bg-red-500 hover:bg-red-800 text-white"
         />
         <ul className="mt-6">
-          {shared
-            ? sharedList.map((item, idx) => (
-                <li
-                  key={idx}
-                  className="flex justify-between items-center py-2"
-                >
-                  <span className="flex">
-                    <DecrementIcon
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleDecrementQuantity(idx);
-                      }}
-                    />
-                    <IncrementIcon
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleIncrementQuantity(idx);
-                      }}
-                    />
-                    <span className=" ml-4 w-28">
-                      {item.name}: {item.quantity}
-                    </span>
-                  </span>
-                  <button
-                    onClick={() => removeItem(idx)}
-                    className="text-red-500"
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))
-            : privateList.map((item, idx) => (
-                <li
-                  key={idx}
-                  className="flex justify-between items-center py-2"
-                >
-                  <span className="flex">
-                    <DecrementIcon
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleDecrementQuantity(idx);
-                      }}
-                    />
-                    <IncrementIcon
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleIncrementQuantity(idx);
-                      }}
-                    />
-                    <span className=" ml-4 w-28">
-                      {item.name}: {item.quantity}
-                    </span>
-                  </span>
-                  <button
-                    onClick={() => removeItem(idx)}
-                    className="text-red-500"
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
+          {list.map((item, idx) => (
+            <li key={idx} className="flex justify-between items-center py-2">
+              <span className="flex">
+                <DecrementIcon
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDecrementQuantity(idx);
+                  }}
+                />
+                <IncrementIcon
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleIncrementQuantity(idx);
+                  }}
+                />
+                <span className=" ml-4 w-28">
+                  {item.name}: {item.quantity}
+                </span>
+              </span>
+              <button onClick={() => removeItem(idx)} className="text-red-500">
+                Remove
+              </button>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

@@ -30,6 +30,7 @@ export interface Ingredient {
 }
 
 export interface ListItem {
+  id: number;
   name: string;
   quantity: number;
 }
